@@ -349,11 +349,10 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
     }
 
     // can't be learn, cheat? Or double learn with lags...
-    if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
-    {
-        SendTrainerBuyFailed(guid, spellId, 0);
-        return;
-    }
+    //if (_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
+     //   SendTrainerBuyFailed(guid, spellId, 0);
+     //   return;
+    //}
 
     // apply reputation discount
     uint32 nSpellCost = uint32(floor(trainer_spell->spellCost * _player->GetReputationPriceDiscount(unit)));
@@ -367,8 +366,8 @@ void WorldSession::HandleTrainerBuySpellOpcode(WorldPacket& recvData)
 
     _player->ModifyMoney(-int64(nSpellCost));
 
-    unit->SendPlaySpellVisualKit(179, 0);       // 53 SpellCastDirected
-    _player->SendPlaySpellVisualKit(362, 1);    // 113 EmoteSalute
+    unit->SendPlaySpellVisualKit(179, 0, 0);       // 53 SpellCastDirected
+    _player->SendPlaySpellVisualKit(362, 1, 0);    // 113 EmoteSalute
 
     // learn explicitly or cast explicitly
     if (trainer_spell->IsCastable())
@@ -1076,4 +1075,3 @@ void WorldSession::HandleRepairItemOpcode(WorldPacket& recvData)
         _player->DurabilityRepairAll(true, discountMod, guildBank);
     }
 }
-

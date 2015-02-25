@@ -310,28 +310,9 @@ void WorldSession::HandleDestroyItemOpcode(WorldPacket& recvData)
 
 void WorldSession::HandleReadItem(WorldPacket& recvData)
 {
-    ObjectGuid Guid;
     uint8 bag, slot;
     recvData >> bag >> slot;
-
-Guid[2] = recvData.ReadBit();
-    Guid[1] = recvData.ReadBit();
-    Guid[3] = recvData.ReadBit();
-    Guid[7] = recvData.ReadBit();
-    Guid[6] = recvData.ReadBit();
-    Guid[4] = recvData.ReadBit();
-    Guid[0] = recvData.ReadBit();
-    Guid[5] = recvData.ReadBit();
-
-    recvData.ReadByteSeq(Guid[0]);
-    recvData.ReadByteSeq(Guid[6]);
-    recvData.ReadByteSeq(Guid[3]);
-    recvData.ReadByteSeq(Guid[5]);
-    recvData.ReadByteSeq(Guid[1]);
-    recvData.ReadByteSeq(Guid[7]);
-    recvData.ReadByteSeq(Guid[4]);
-    recvData.ReadByteSeq(Guid[2]);
-
+    
     Item* pItem = _player->GetItemByPos(bag, slot);
 
     if (pItem && pItem->GetTemplate()->PageText)
@@ -1581,7 +1562,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
         unk0[i] = recvData.ReadBit();
         unk1[i] = recvData.ReadBit();
 
-        if(unk1[i])
+        if (unk1[i])
         {
             itemGuids[i][5] = recvData.ReadBit();
             itemGuids[i][6] = recvData.ReadBit();
@@ -1593,7 +1574,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             itemGuids[i][2] = recvData.ReadBit();
         }
 
-        if(unk0[i])
+        if (unk0[i])
         {
             itemGuids[i][4] = recvData.ReadBit();
             itemGuids[i][1] = recvData.ReadBit();
@@ -1624,7 +1605,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
 
     for (uint8 i = 0; i < count; ++i)
     {
-        if(unk0[i])
+        if (unk0[i])
         {
             recvData.ReadByteSeq(itemGuids[i][2]);
             recvData.ReadByteSeq(itemGuids[i][5]);
@@ -1636,7 +1617,7 @@ void WorldSession::HandleTransmogrifyItems(WorldPacket& recvData)
             recvData.ReadByteSeq(itemGuids[i][1]);
         }
 
-        if(unk1[i])
+        if (unk1[i])
         {
             recvData.ReadByteSeq(itemGuids[i][7]);
             recvData.ReadByteSeq(itemGuids[i][1]);
