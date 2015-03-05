@@ -940,15 +940,33 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_RESURRECT_RESPONSE");
 
-    uint64 guid;
-    uint8 status;
-    recvData >> guid;
-    recvData >> status;
+    ObjectGuid guid;
+    uint32 response;
+
+    recvData >> response;
+
+    guid[3] = recvData.ReadBit();
+    guid[0] = recvData.ReadBit();
+    guid[6] = recvData.ReadBit();
+    guid[4] = recvData.ReadBit();
+    guid[5] = recvData.ReadBit();
+    guid[2] = recvData.ReadBit();
+    guid[1] = recvData.ReadBit();
+    guid[7] = recvData.ReadBit();
+
+    recvData.ReadByteSeq(guid[7]);
+    recvData.ReadByteSeq(guid[0]);
+    recvData.ReadByteSeq(guid[1]);
+    recvData.ReadByteSeq(guid[3]);
+    recvData.ReadByteSeq(guid[4]);
+    recvData.ReadByteSeq(guid[6]);
+    recvData.ReadByteSeq(guid[2]);
+    recvData.ReadByteSeq(guid[5]);
 
     if (GetPlayer()->IsAlive())
         return;
 
-    if (status == 0)
+    if (response == 0)
     {
         GetPlayer()->ClearResurrectRequestData();           // reject
         return;
@@ -1170,8 +1188,7 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 {
     TC_LOG_DEBUG("network", "WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
 
-    uint32 type;
-    recvData >> type;
+    uint32 type = recvData.ReadBits(3);
 
     TC_LOG_DEBUG("network", "RAD: type %u", type);
 
@@ -1195,33 +1212,33 @@ void WorldSession::HandleRequestAccountData(WorldPacket& recvData)
 
     dest.resize(destSize);
 
-    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8+4+4+4+destSize);
+    WorldPacket data(SMSG_UPDATE_ACCOUNT_DATA, 8 + 4 + 4 + 4 + destSize);
 
     ObjectGuid guid;
 
-    data << uint32(size);                                   // decompressed length
-    data << uint32(destSize);
-    data.append(dest);
-    data << uint32(adata->Time);                            // unix time
-    data.WriteBit(guid[7]);
-    data.WriteBits(type, 3);                                 // type (0-7)
-    data.WriteBit(guid[3]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[1]);
+    data.WriteBits(type, 3);       // type (0-7)
     data.WriteBit(guid[5]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[3]);
+    data.WriteBit(guid[7]);
     data.WriteBit(guid[0]);
     data.WriteBit(guid[4]);
     data.WriteBit(guid[2]);
+    data.WriteBit(guid[6]);
 
-    data.WriteByteSeq(guid[6]);
-    data.WriteByteSeq(guid[7]);
-    data.WriteByteSeq(guid[4]);
+    data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[1]);
     data.WriteByteSeq(guid[5]);
+    data << uint32(size);         // decompressed length
+    data << uint32(destSize);
+    data.append(dest);
+    data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[4]);
     data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
     data.WriteByteSeq(guid[2]);
-
+    data << uint32(adata->Time); // unix time
+    
     SendPacket(&data);
 }
 

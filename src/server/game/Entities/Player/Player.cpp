@@ -214,7 +214,6 @@ void PlayerTaxi::LoadTaxiMask(std::string const &data)
 
 void PlayerTaxi::AppendTaximaskTo(ByteBuffer& data, bool all)
 {
-    data << uint32(TaxiMaskSize);
     if (all)
     {
         for (uint8 i = 0; i < TaxiMaskSize; ++i)
@@ -23075,24 +23074,27 @@ void Player::SendCooldownEvent(SpellInfo const* spellInfo, uint32 itemId /*= 0*/
     ObjectGuid guid = GetGUID();
 
     WorldPacket data(SMSG_COOLDOWN_EVENT, 4 + 8);
-    data.WriteBit(guid[4]);
-    data.WriteBit(guid[7]);
-    data.WriteBit(guid[1]);
-    data.WriteBit(guid[6]);
-    data.WriteBit(guid[5]);
+
     data.WriteBit(guid[3]);
-    data.WriteBit(guid[0]);
+    data.WriteBit(guid[6]);
     data.WriteBit(guid[2]);
+    data.WriteBit(0);       // unk
+    data.WriteBit(guid[7]);
+    data.WriteBit(guid[0]);
+    data.WriteBit(guid[1]);
+    data.WriteBit(guid[5]);
+    data.WriteBit(guid[4]);
 
     data.WriteByteSeq(guid[0]);
-    data.WriteByteSeq(guid[5]);
     data.WriteByteSeq(guid[1]);
-    data.WriteByteSeq(guid[4]);
-    data.WriteByteSeq(guid[3]);
     data.WriteByteSeq(guid[2]);
-    data.WriteByteSeq(guid[6]);
-    data << uint32(spellInfo->Id);
     data.WriteByteSeq(guid[7]);
+    data.WriteByteSeq(guid[3]);
+    data.WriteByteSeq(guid[6]);
+    data.WriteByteSeq(guid[5]);
+    data << uint32(spellInfo->Id);
+    data.WriteByteSeq(guid[4]);
+
     SendDirectMessage(&data);
 }
 
@@ -24010,10 +24012,12 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
 
 void Player::SendTransferAborted(uint32 mapid, TransferAbortReason reason, uint8 arg)
 {
-    WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
+    WorldPacket data(SMSG_TRANSFER_ABORTED, 4 + 2);
+    data.WriteBit(!arg);
+    data.WriteBits(reason, 5); // transfer abort reason
+    if (arg)
+        data << uint8(arg);
     data << uint32(mapid);
-    data << uint8(reason); // transfer abort reason
-    data << uint8(arg);
     GetSession()->SendPacket(&data);
 }
 
